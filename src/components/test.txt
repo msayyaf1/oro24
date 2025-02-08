@@ -1,0 +1,107 @@
+This is a login form, this is currently on index.js of a nextjs pages router application, 
+add usestate to manage the state for showing password, also successful login should reditct to a new route, say home,
+
+
+
+
+
+
+import React from "react";
+import Image from "next/image";
+
+export default function Home() {
+  return (
+    <div className="bg-cover bg-center bg-fixed bg-opacity-35 bg-[url('/assets/login-bg.jpg')]">
+      <div className="h-screen flex justify-center items-center">
+        <div className="bg-white/95 mx-4 p-8 rounded-lg shadow-md w-full md:w-1/2 lg:w-1/4">
+          <div className="text-3xl font-bold mb-8 inline-flex justify-center w-full">
+            <Image
+              src="/assets/oro_logo.png"
+              alt="Login"
+              width={150}
+              height={48}
+              priority
+            />
+          </div>
+          <form>
+            <div className="mb-4">
+              <input
+                className="border rounded w-full py-2 px-3 text-black font-normal bg-[#EAF0FD] leading-tight focus:outline-double focus:shadow-outline"
+                id="email"
+                type="email"
+                placeholder="Please Enter Your Email"
+              />
+            </div>
+            <div className="mb-4">
+              <input
+                className="border rounded w-full py-2 px-3 text-black bg-[#EAF0FD] mb-3 leading-tight focus:outline-double focus:shadow-outline"
+                id="password"
+                type="password"
+                placeholder="Please Enter Your Password"
+              />
+            </div>
+            <div className="mb-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="show_pwd"
+                  name="Show Password"
+                  value="Unchecked"
+                />
+                <label
+                  htmlFor="showpwd"
+                  className="text-gray-800 font-semibold text-sm"
+                >
+                  Show Password
+                </label>
+              </div>
+
+              <div className="flex justify-between items-center w-full">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="remember_me"
+                    name="Remember Me"
+                    value="Unchecked"
+                  />
+                  <label
+                    htmlFor="rememberme"
+                    className="text-gray-800 font-semibold text-sm"
+                  >
+                    Remember Me
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <button
+                className="bg-[#61ACCB] transition  hover:shadow-gray-500 hover:shadow-sm text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+                type="button"
+              >
+                Sign In
+              </button>
+            </div>
+            <div className="my-4 text-xs text-gray-600">
+              <p>
+                Want to be a partner with ORO24?
+                <span className="pl-1">
+                  <a
+                    className="text-[#B23280] hover:text-gray-800 text-xs font-semibold"
+                    href="#"
+                  >
+                    Register Now
+                  </a>
+                </span>
+              </p>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+now for the api functionality, on submitting the form, the api call should go to https://hello24/api/token
+it's a post http request, use normal fetch, the body should be the email and password from the form

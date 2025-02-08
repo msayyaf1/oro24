@@ -1,114 +1,178 @@
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { useAuth } from "../hooks/useAuth";
 
 export default function Home() {
-  return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              src/pages/index.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+  const { login } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    rememberMe: false,
+  });
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
+  const handleInputChange = (e) => {
+    const { id, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: type === "checkbox" ? checked : value,
+    }));
+    // Clear any previous error when user starts typing
+    if (error) setError("");
+  };
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch("https://oro24world.com/api/token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-app-id": "KYCTY",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          response.status === 401
+            ? "Invalid email or password"
+            : "Something went wrong. Please try again."
+        );
+      }
+
+      const data = await response.json();
+      // console.log("data", data);
+      login(data.token);
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Add this to your existing useEffect in the login page
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      localStorage.removeItem("token");
+    }
+  }, []);
+
+  return (
+    <div className="bg-cover bg-center bg-fixed bg-opacity-35 bg-[url('/assets/login-bg.jpg')]">
+      <div className="h-screen flex justify-center items-center">
+        <div className="bg-white/95 mx-4 p-8 rounded-lg shadow-md w-full md:w-1/2 lg:w-1/4">
+          <div className="text-3xl font-bold mb-8 inline-flex justify-center w-full">
             <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+              src="/assets/oro_logo.png"
+              alt="Login"
+              width={150}
+              height={48}
+              priority
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+          </div>
+          <form onSubmit={handleLogin}>
+            {error && (
+              <div className="mb-4 text-red-500 text-sm text-center">
+                {error}
+              </div>
+            )}
+            <div className="mb-4">
+              <input
+                className="border rounded w-full py-2 px-3 text-black font-normal bg-[#EAF0FD] leading-tight focus:outline-double focus:shadow-outline"
+                id="email"
+                type="email"
+                placeholder="Please Enter Your Email"
+                value={formData.email}
+                onChange={handleInputChange}
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <div className="mb-4">
+              <input
+                className="border rounded w-full py-2 px-3 text-black bg-[#EAF0FD] mb-3 leading-tight focus:outline-double focus:shadow-outline"
+                id="password"
+                type={showPassword ? "text" : "password"}
+                placeholder="Please Enter Your Password"
+                value={formData.password}
+                onChange={handleInputChange}
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <div className="mb-4">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="show_pwd"
+                  checked={showPassword}
+                  onChange={(e) => setShowPassword(e.target.checked)}
+                  disabled={isLoading}
+                />
+                <label
+                  htmlFor="show_pwd"
+                  className="text-gray-800 font-semibold text-sm"
+                >
+                  Show Password
+                </label>
+              </div>
+
+              <div className="flex justify-between items-center w-full">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="rememberMe"
+                    checked={formData.rememberMe}
+                    onChange={handleInputChange}
+                    disabled={isLoading}
+                  />
+                  <label
+                    htmlFor="rememberMe"
+                    className="text-gray-800 font-semibold text-sm"
+                  >
+                    Remember Me
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <button
+                className={`bg-[#61ACCB] transition hover:shadow-gray-500 hover:shadow-sm text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                type="submit"
+                disabled={isLoading}
+              >
+                {isLoading ? "Signing In..." : "Sign In"}
+              </button>
+            </div>
+            <div className="my-4 text-xs text-gray-600">
+              <p>
+                Want to be a partner with ORO24?
+                <span className="pl-1">
+                  <a
+                    className="text-[#B23280] hover:text-gray-800 text-xs font-semibold"
+                    href="#"
+                  >
+                    Register Now
+                  </a>
+                </span>
+              </p>
+            </div>
+          </form>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
     </div>
   );
 }
