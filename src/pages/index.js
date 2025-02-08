@@ -50,7 +50,6 @@ export default function Home() {
       }
 
       const data = await response.json();
-      // console.log("data", data);
       login(data.token);
     } catch (error) {
       setError(error.message);
@@ -59,7 +58,6 @@ export default function Home() {
     }
   };
 
-  // Add this to your existing useEffect in the login page
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
